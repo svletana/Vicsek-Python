@@ -1,4 +1,4 @@
-# 3D-Vicsek-Python
+# 3D Vicsek Python
 This repository cointains my very simple Python implementation of the Vicsek Model.
 
 **Vicsek.py** contains the class for performing the simulation, can be used as a module.
