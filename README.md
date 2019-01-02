@@ -5,7 +5,7 @@ This repository cointains my very simple Python implementation of the Vicsek Mod
 
 **Movie_vcsk.py** is a script that runs the simulation and makes a movie out of it.
  
-["Vicsek 2D example"](https://www.youtube.com/watch?v=TR5vrJL48-w&feature=youtu.be)
+[Vicsek 2D example](https://www.youtube.com/watch?v=TR5vrJL48-w&feature=youtu.be)
 
 ---
  
