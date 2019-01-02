@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-class Vicsek3D:
+class Vicsek2D:
     '''Implementation of 3D Vicsek model'''
-    def __init__(self, dt, N, R, L, v, ns, steps, data_name):
+    def __init__(self, dt, N, R, L, v, ns, steps, data_name, save_bool):
         self.dt = dt  # frame
         self.N = N  # number of particles
         self.R = R  # radius of interaction
@@ -18,21 +18,19 @@ class Vicsek3D:
         self.steps = steps  # number of simulation steps
         self.state = []  # array for system state
         self.data_name = data_name  # filename of simulation data
+        self.save_bool = save_bool
 
         # write simulation metadata
-        self.metadata()
+        # self.metadata()
 
         # initialize positions
-        self.pos = (2 * np.random.random((self.N, 3)) - 1) * self.L * 0.5
+        self.pos = (2 * np.random.random((self.N, 2)) - 1) * self.L * 0.5
 
         # initialize velocities
-        self.vel = (2 * np.random.random((self.N, 3)) - 1) * self.v * 0.5
+        self.vel = (2 * np.random.random((self.N, 2)) - 1) * self.v * 0.5
 
-        # initialize orientations (3D space --> two angles)
-        # alpha between 0 and pi, phi between 0 and 2pi
-        alpha = np.random.random(self.N) * np.pi
-        phi = np.random.random(self.N) * 2 * np.pi
-        self.theta = np.array([[i, j] for i, j in zip(alpha, phi)])
+        # initialize orientations (2D space --> one angles)
+        self.theta = np.random.random(self.N) * 2 * np.pi
 
         # initialize noise
         self.randomize_noise()
@@ -64,11 +62,12 @@ class Vicsek3D:
 
     def save_data(self):
         '''Save simulation data to pickle file'''
-        pd.to_pickle(self.state, self.data_name)
+        if self.save_bool:
+            pd.to_pickle(self.state, self.data_name)
 
     def randomize_noise(self):
         '''Randomize noise'''
-        self.noise = (2 * np.random.random((self.N, 2)) - 1) * self.ns
+        self.noise = (2 * np.random.random(self.N) - 1) * self.ns
 
     def step_angle_p(self, p):
         '''Angle time step for particle p'''
@@ -79,19 +78,18 @@ class Vicsek3D:
                 interacting.append(i)
         # compute average orientation from interacting particles
         if interacting == []:
-            return self.theta[p]
+            return self.theta[p] + self.noise[p]
         else:
-            avg_theta = np.mean([self.theta[i] for i in interacting], axis=0)
+            # avg_theta = np.mean([self.theta[i] for i in interacting], axis=0)
+            sin = [np.sin(self.theta[i]) for i in interacting]
+            cos = [np.cos(self.theta[i]) for i in interacting]
+            avg_theta = np.arctan(np.mean(sin, axis=0) / np.mean(cos, axis=0))
             new_theta = avg_theta + self.noise[p]
             return new_theta
 
     def step_vel_p(self, p, new_theta):
         '''Velocity time step for particle p'''
-        alpha = new_theta[0]
-        phi = new_theta[1]
-        new_vel = np.array([np.cos(alpha) * np.sin(phi),
-                            np.sin(alpha) * np.sin(phi),
-                            np.cos(phi)])
+        new_vel = np.array([np.cos(self.theta[p]), np.sin(self.theta[p])])
         new_vel *= self.v
         return new_vel
 
@@ -110,18 +108,14 @@ class Vicsek3D:
         elif new_pos[1] < -limit:
             new_pos[1] += 2 * limit
         # periodic boundary conditions z
-        if new_pos[2] > limit:
-            new_pos[2] -= 2 * limit
-        elif new_pos[2] < -limit:
-            new_pos[2] += 2 * limit
         return new_pos
 
     def full_step(self):
         '''Compute a full time step'''
         # make room for new state
-        new_angles = np.zeros((self.N, 2))
-        new_positions = np.zeros((self.N, 3))
-        new_velocities = np.zeros((self.N, 3))
+        new_angles = np.zeros(self.N)
+        new_positions = np.zeros((self.N, 2))
+        new_velocities = np.zeros((self.N, 2))
 
         # compute new state for each particle
         for p in range(self.N):
@@ -141,12 +135,10 @@ class Vicsek3D:
             self.write_state()
         self.save_data()
 
-    def show_state(self):
+    def show_state(self, block=False):
         '''Draw current state'''
         fig = plt.figure()
-        ax = fig.gca(projection='3d')
         x = [r[0] for r in self.pos]
         y = [r[1] for r in self.pos]
-        z = [r[2] for r in self.pos]
-        ax.scatter(x, y, z)
-        plt.show()
+        plt.plot(x, y, 'o')
+        plt.show(block=block)
