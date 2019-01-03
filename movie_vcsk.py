@@ -40,8 +40,12 @@ def vicsek_movie(L, pos_x, pos_y, steps):
     line_ani.save("vicsek_ani.mp4", writer='imagemagick', fps=30)
 
 
+# variables
+N, L, ns, steps = 300, 25, .1, 500
+# things I'll keep fixed
+dt, R, v = 1, 1, .3
+data_name, save_bool = "data", True
 #  initialize simulation
-dt, N, R, L, v, ns, steps, data_name, save_bool = 1, 300, 1, 25, .3, 1, 500, "data", True
 sim = vi.Vicsek2D(dt=dt, N=N, R=R, L=L, v=v, ns=ns, steps=steps,
                   data_name=data_name, save_bool=save_bool)
 sim.do_simulation()
