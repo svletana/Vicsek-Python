@@ -1,7 +1,7 @@
 # Vicsek Python
 This repository cointains my very simple Python implementation of the Vicsek Model.
 
-**Vicsek.py** contains the class for performing the simulation, can be used as a module.
+**Vicsek.py** does the simulation.
 
 **Movie_vcsk.py** is a script that runs the simulation and makes a movie out of it.
  
